@@ -1,7 +1,6 @@
  V13 FVTT Seamless Video Loader Patch (FVTT 无缝视频加载屏补丁)
 让你的 Foundry VTT 告别加载时的黑屏等待，实现 0 延迟的沉浸式进入体验。 
 
-[在此处插入你的效果 GIF 动图]
 
 📖 简介 (Introduction)
 传统的 FVTT 模组（Modules）需要在核心框架加载完毕后才能运行，这导致在点击“进入游戏”和加载界面出现之间，玩家会看到几秒钟的黑屏或灰色背景。
