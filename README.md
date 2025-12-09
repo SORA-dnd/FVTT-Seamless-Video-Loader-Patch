@@ -34,7 +34,7 @@ UI 适配：为原版加载进度条（Loading Bar）添加了动态文字描边
 2. 定位核心文件
 找到你的 FVTT 安装目录（非 User Data 目录）。
 
-目标文件：resources/app/templates/game.hbs 
+目标文件："App\resources\app\templates\views\game.hbs"
 
 
 3. 应用补丁
