@@ -1,0 +1,188 @@
+<div id="game-splash-overlay" 
+     style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2147483647; background: #000; display: flex; justify-content: center; align-items: center; cursor: wait;">
+
+    <div id="media-container" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1;">
+        </div>
+
+    <div id="splash-prompt" style="
+        position: absolute; 
+        bottom: 15%; 
+        width: 100%; 
+        text-align: center; 
+        z-index: 100; 
+        opacity: 0; 
+        transition: opacity 1s; 
+        pointer-events: none;
+    ">
+        <h2 style="
+            font-family: 'Signika', sans-serif; 
+            font-size: 2.5em; 
+            color: rgba(255,255,255,0.9); 
+            text-transform: uppercase; 
+            letter-spacing: 0.2em; 
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            margin: 0;
+        ">
+            Click to Start
+        </h2>
+        <p style="
+            color: rgba(255,255,255,0.7); 
+            font-size: 1.2em; 
+            margin-top: 10px;
+            letter-spacing: 0.1em;
+        ">
+            点击屏幕进入世界
+        </p>
+    </div>
+
+</div>
+
+<style>
+    /* 隐藏原生 UI */
+    #loading { display: none !important; }
+    
+    /* 呼吸灯动画 */
+    @keyframes pulse { 
+        0% { opacity: 0.6; transform: scale(0.98); } 
+        50% { opacity: 1; transform: scale(1.02); } 
+        100% { opacity: 0.6; transform: scale(0.98); } 
+    }
+    .anim-pulse { animation: pulse 3s infinite ease-in-out; }
+    
+    /* 媒体元素通用样式 */
+    .splash-media {
+        width: 100%; height: 100%; object-fit: cover; 
+        position: absolute; top: 0; left: 0; 
+        opacity: 0; transition: opacity 0.8s ease-in;
+    }
+</style>
+
+<script>
+    (function() {
+        const overlay = document.getElementById('game-splash-overlay');
+        const container = document.getElementById('media-container');
+        const prompt = document.getElementById('splash-prompt');
+        
+        // 资源路径配置
+        const modulePath = "/modules/my-custom-loader";
+        
+        // 等待获取 ID
+        const waitId = setInterval(() => {
+            if (typeof game !== "undefined" && game.world && game.world.id) {
+                clearInterval(waitId);
+                const worldId = game.world.id;
+                
+                // 定义尝试顺序：
+                // 1. 专属视频 (.webm)
+                // 2. 专属图片 (.webp)
+                // 3. 默认视频 (default.webm)
+                const attempts = [
+                    { type: 'video', src: `${modulePath}/worlds/${worldId}.webm` },
+                    { type: 'image', src: `${modulePath}/worlds/${worldId}.webp` },
+                    { type: 'video', src: `${modulePath}/default.webm` }
+                ];
+                
+                tryLoadSequence(attempts, 0);
+            }
+        }, 50);
+
+        // 递归加载函数
+        function tryLoadSequence(list, index) {
+            if (index >= list.length) return; // 都失败了（极少见）
+
+            const item = list[index];
+            
+            if (item.type === 'video') {
+                const vid = document.createElement('video');
+                vid.autoplay = true;
+                vid.loop = true;
+                vid.muted = true;
+                vid.playsInline = true;
+                vid.className = 'splash-media';
+                vid.src = item.src;
+                
+                vid.onloadeddata = () => { showMedia(vid); };
+                vid.onerror = () => { tryLoadSequence(list, index + 1); }; // 失败试下一个
+                
+                container.appendChild(vid);
+            } 
+            else if (item.type === 'image') {
+                const img = new Image();
+                img.className = 'splash-media';
+                img.src = item.src;
+                
+                img.onload = () => { 
+                    const domImg = document.createElement('img');
+                    domImg.className = 'splash-media';
+                    domImg.src = item.src;
+                    container.appendChild(domImg);
+                    // 稍微延时显示，确保渲染
+                    requestAnimationFrame(() => showMedia(domImg));
+                };
+                img.onerror = () => { tryLoadSequence(list, index + 1); };
+            }
+        }
+
+        function showMedia(element) {
+            // 淡入画面
+            element.style.opacity = 1;
+            
+            // 等待游戏加载完毕
+            const checkGame = setInterval(() => {
+                if (game.ready) {
+                    clearInterval(checkGame);
+                    
+                    // 显示文字，允许点击
+                    prompt.style.opacity = 1;
+                    prompt.classList.add('anim-pulse');
+                    overlay.style.cursor = "pointer";
+                    
+                    // 绑定点击事件
+                    setupClick();
+                }
+            }, 100);
+        }
+
+        function setupClick() {
+            const enter = (e) => {
+                e.preventDefault(); e.stopPropagation();
+                window.removeEventListener('click', enter, true);
+                
+                // 淡出
+                overlay.style.transition = "opacity 0.8s";
+                overlay.style.opacity = 0;
+                
+                setTimeout(() => overlay.remove(), 800);
+            };
+            window.addEventListener('click', enter, true);
+            window.addEventListener('keydown', enter, true); // 按任意键也能进
+        }
+    })();
+</script>
+<template id="camera-views"></template>
+<div id="interface">
+    <section id="ui-left" class="flexrow">
+        <div id="ui-left-column-1" class="flexcol">
+            <template id="scene-controls"></template>
+            <template id="players"></template>
+        </div>
+        <div id="ui-left-column-2" class="flexcol">
+            <template id="scene-navigation"></template>
+        </div>
+    </section>
+    <section id="ui-middle">
+        <header id="ui-top" class="flexcol">
+            <div id="loading"></div>
+        </header>
+        <footer id="ui-bottom" class="flexcol">
+            <template id="hotbar"></template>
+        </footer>
+    </section>
+    <section id="ui-right" class="flexrow">
+        <div id="ui-right-column-1" class="flexcol"></div>
+        <template id="sidebar"></template>
+    </section>
+</div>
+<template id="hud"></template>
+<template id="board"></template>
+<template id="pause"></template>
