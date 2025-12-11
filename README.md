@@ -69,4 +69,4 @@ You are free to use, modify, and distribute this patch, provided that:
 3. This is a modification of core Foundry VTT files; original code rights belong to Foundry Gaming LLC.
 
 **关于署名 (About Attribution):**
-如果您在其整合包或教程中使用了本补丁，请务必保留原作者署名。尊重社区开源劳动成果，请勿将他人代码直接据为己有。
+如果您在其整合包或教程中使用了本补丁，请务必保留原作者署名。
